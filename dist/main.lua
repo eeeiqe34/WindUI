@@ -8340,7 +8340,48 @@ if al.Icon then
 al:SetIcon(al.Icon)
 end
 
-local ao=ae("TextLabel",{
+local descText = ak.Desc or ak.Description
+local hasDesc = descText and descText ~= ""
+local titleContainer
+if hasDesc then
+titleContainer = ae("Frame",{
+BackgroundTransparency=1,
+Size=UDim2.new(1, am and -(al.IconSize+8) or 0, 0, al.HeaderSize-12),
+},{
+ae("TextLabel",{
+BackgroundTransparency=1,
+TextXAlignment=al.TextXAlignment,
+TextSize=al.TextSize,
+TextTransparency=0.05,
+ThemeTag={
+TextColor3="Text",
+},
+FontFace=Font.new(aa.Font,al.FontWeight),
+Text=al.Title,
+Size=UDim2.new(1,0,0,18),
+TextWrapped=true,
+ClipsDescendants=true,
+}),
+ae("TextLabel", {
+BackgroundTransparency = 1,
+TextXAlignment = al.TextXAlignment or "Left",
+TextSize = 12,
+ThemeTag = { TextColor3 = "Text" },
+TextTransparency = 0.55,
+FontFace = Font.new(aa.Font, Enum.FontWeight.Medium),
+Text = descText,
+Size = UDim2.new(1, 0, 0, 14),
+TextWrapped = true,
+ClipsDescendants=true,
+LayoutOrder = 1,
+}),
+ae("UIListLayout",{
+Padding=UDim.new(0,2),
+FillDirection="Vertical",
+}),
+})
+else
+titleContainer = ae("TextLabel",{
 BackgroundTransparency=1,
 TextXAlignment=al.TextXAlignment,
 AutomaticSize="Y",
@@ -8350,17 +8391,12 @@ ThemeTag={
 TextColor3="Text",
 },
 FontFace=Font.new(aa.Font,al.FontWeight),
-
-
 Text=al.Title,
-Size=UDim2.new(
-1,
-0,
-0,
-0
-),
+Size=UDim2.new(1,0,0,0),
 TextWrapped=true,
 })
+end
+local ao = titleContainer
 
 
 local function UpdateTitleSize()
@@ -8371,7 +8407,7 @@ end
 if an.Visible then
 ap=ap-(al.IconSize+8)
 end
-ao.Size=UDim2.new(1,ap,0,0)
+ao.Size=UDim2.new(1,ap,0, hasDesc and al.HeaderSize-12 or 0)
 end
 
 
@@ -8381,19 +8417,18 @@ BackgroundTransparency=1,
 Parent=ak.Parent,
 ClipsDescendants=true,
 AutomaticSize="Y",
-ImageTransparency=al.Box and.93 or 1,
+ImageTransparency=(al.Box or hasDesc) and.93 or 1,
 ThemeTag={
 ImageColor3="Text",
 },
 },{
 ae("TextButton",{
-Size=UDim2.new(1,0,0,Expandable and 0 or al.HeaderSize),
+Size=UDim2.new(1,0,0,al.HeaderSize),
 BackgroundTransparency=1,
-AutomaticSize=Expandable and nil or"Y",
 Text="",
 Name="Top",
 },{
-al.Box and ae("UIPadding",{
+(al.Box or hasDesc) and ae("UIPadding",{
 PaddingLeft=UDim.new(0,ak.Window.ElementConfig.UIPadding),
 PaddingRight=UDim.new(0,ak.Window.ElementConfig.UIPadding),
 })or nil,
@@ -9344,6 +9379,7 @@ local aj=a.load'U'
 function aa.New(ak,al,am,an,ao)
 local ap={
 Title=ak.Title or"Section",
+Desc=ak.Desc,
 Icon=ak.Icon,
 IconThemed=ak.IconThemed,
 Opened=ak.Opened or false,
@@ -9388,26 +9424,54 @@ ImageTransparency=.7,
 })
 })
 
-local as=af("Frame",{
-Size=UDim2.new(1,0,0,ap.HeaderSize),
+local titleContent
+if ap.Desc then
+titleContent=af("Frame",{
+Size=UDim2.new(1,aq and(-ap.IconSize-10)*2 or(-ap.IconSize-10),0,ap.HeaderSize-10),
 BackgroundTransparency=1,
-Parent=al,
-ClipsDescendants=true,
 },{
-af("TextButton",{
-Size=UDim2.new(1,0,0,ap.HeaderSize),
-BackgroundTransparency=1,
-Text="",
-},{
-aq,
 af("TextLabel",{
+Text=ap.Title,
+TextXAlignment="Left",
+Size=UDim2.new(1,0,0,16),
+ThemeTag={
+TextColor3="Text",
+},
+FontFace=Font.new(ae.Font,Enum.FontWeight.SemiBold),
+TextSize=14,
+BackgroundTransparency=1,
+TextTransparency=.2,
+TextWrapped=true,
+ClipsDescendants=true,
+}),
+af("TextLabel",{
+Text=ap.Desc,
+TextXAlignment="Left",
+Size=UDim2.new(1,0,0,12),
+ThemeTag={
+TextColor3="Text",
+},
+FontFace=Font.new(ae.Font,Enum.FontWeight.Medium),
+TextSize=11,
+BackgroundTransparency=1,
+TextTransparency=.6,
+TextWrapped=true,
+ClipsDescendants=true,
+LayoutOrder=1
+}),
+af("UIListLayout",{
+FillDirection="Vertical",
+Padding=UDim.new(0,2)
+})
+})
+else
+titleContent=af("TextLabel",{
 Text=ap.Title,
 TextXAlignment="Left",
 Size=UDim2.new(
 1,
 aq and(-ap.IconSize-10)*2
 or(-ap.IconSize-10),
-
 1,
 0
 ),
@@ -9418,9 +9482,38 @@ FontFace=Font.new(ae.Font,Enum.FontWeight.SemiBold),
 TextSize=14,
 BackgroundTransparency=1,
 TextTransparency=.7,
-
 TextWrapped=true
-}),
+})
+end
+
+local outlineFrame
+if ap.Desc then
+outlineFrame=af("ImageLabel",{
+Size=UDim2.new(1,-6,1,-6),
+Position=UDim2.new(0,3,0,3),
+BackgroundTransparency=1,
+Image=ae.Shapes["Squircle-Outline"],
+ImageColor3=Color3.fromRGB(255,255,255),
+ImageTransparency=.85,
+ScaleType="Slice",
+SliceCenter=Rect.new(128,128,128,128)
+})
+end
+
+local as=af("Frame",{
+Size=UDim2.new(1,0,0,ap.HeaderSize),
+BackgroundTransparency=1,
+Parent=al,
+ClipsDescendants=true,
+},{
+outlineFrame,
+af("TextButton",{
+Size=UDim2.new(1,0,0,ap.HeaderSize),
+BackgroundTransparency=1,
+Text="",
+},{
+aq,
+titleContent,
 af("UIListLayout",{
 FillDirection="Horizontal",
 VerticalAlignment="Center",
