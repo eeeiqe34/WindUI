@@ -8341,47 +8341,12 @@ al:SetIcon(al.Icon)
 end
 
 local descText = ak.Desc or ak.Description
-local hasDesc = descText and descText ~= ""
-local titleContainer
-if hasDesc then
-titleContainer = ae("Frame",{
-BackgroundTransparency=1,
-Size=UDim2.new(1, am and -(al.IconSize+8) or 0, 0, al.HeaderSize-12),
-},{
-ae("TextLabel",{
-BackgroundTransparency=1,
-TextXAlignment=al.TextXAlignment,
-TextSize=al.TextSize,
-TextTransparency=0.05,
-ThemeTag={
-TextColor3="Text",
-},
-FontFace=Font.new(aa.Font,al.FontWeight),
-Text=al.Title,
-Size=UDim2.new(1,0,0,18),
-TextWrapped=true,
-ClipsDescendants=true,
-}),
-ae("TextLabel", {
-BackgroundTransparency = 1,
-TextXAlignment = al.TextXAlignment or "Left",
-TextSize = 12,
-ThemeTag = { TextColor3 = "Text" },
-TextTransparency = 0.55,
-FontFace = Font.new(aa.Font, Enum.FontWeight.Medium),
-Text = descText,
-Size = UDim2.new(1, 0, 0, 14),
-TextWrapped = true,
-ClipsDescendants=true,
-LayoutOrder = 1,
-}),
-ae("UIListLayout",{
-Padding=UDim.new(0,2),
-FillDirection="Vertical",
-}),
-})
-else
-titleContainer = ae("TextLabel",{
+local displayText = al.Title
+if descText and descText ~= "" then
+displayText = al.Title .. "\n<font size=\"12\" transparency=\"0.5\">" .. descText .. "</font>"
+end
+
+local ao=ae("TextLabel",{
 BackgroundTransparency=1,
 TextXAlignment=al.TextXAlignment,
 AutomaticSize="Y",
@@ -8391,12 +8356,17 @@ ThemeTag={
 TextColor3="Text",
 },
 FontFace=Font.new(aa.Font,al.FontWeight),
-Text=al.Title,
-Size=UDim2.new(1,0,0,0),
+RichText=true,
+
+Text=displayText,
+Size=UDim2.new(
+1,
+0,
+0,
+0
+),
 TextWrapped=true,
 })
-end
-local ao = titleContainer
 
 
 local function UpdateTitleSize()
@@ -8407,7 +8377,7 @@ end
 if an.Visible then
 ap=ap-(al.IconSize+8)
 end
-ao.Size=UDim2.new(1,ap,0, hasDesc and al.HeaderSize-12 or 0)
+ao.Size=UDim2.new(1,ap,0,0)
 end
 
 
@@ -8417,18 +8387,19 @@ BackgroundTransparency=1,
 Parent=ak.Parent,
 ClipsDescendants=true,
 AutomaticSize="Y",
-ImageTransparency=(al.Box or hasDesc) and.93 or 1,
+ImageTransparency=al.Box and.93 or 1,
 ThemeTag={
 ImageColor3="Text",
 },
 },{
 ae("TextButton",{
-Size=UDim2.new(1,0,0,al.HeaderSize),
+Size=UDim2.new(1,0,0,Expandable and 0 or al.HeaderSize),
 BackgroundTransparency=1,
+AutomaticSize=Expandable and nil or"Y",
 Text="",
 Name="Top",
 },{
-(al.Box or hasDesc) and ae("UIPadding",{
+al.Box and ae("UIPadding",{
 PaddingLeft=UDim.new(0,ak.Window.ElementConfig.UIPadding),
 PaddingRight=UDim.new(0,ak.Window.ElementConfig.UIPadding),
 })or nil,
@@ -9377,9 +9348,10 @@ local ah=ae.Tween
 local aj=a.load'U'
 
 function aa.New(ak,al,am,an,ao)
+local descText = ak.Desc or ak.Description
 local ap={
 Title=ak.Title or"Section",
-Desc=ak.Desc,
+Desc=descText,
 Icon=ak.Icon,
 IconThemed=ak.IconThemed,
 Opened=ak.Opened or false,
@@ -9389,6 +9361,11 @@ IconSize=18,
 
 Expandable=false,
 }
+
+local displayText = ap.Title
+if descText and descText ~= "" then
+displayText = ap.Title .. "\n<font size=\"11\" transparency=\"0.5\">" .. descText .. "</font>"
+end
 
 local aq
 if ap.Icon then
@@ -9424,54 +9401,27 @@ ImageTransparency=.7,
 })
 })
 
-local titleContent
-if ap.Desc then
-titleContent=af("Frame",{
-Size=UDim2.new(1,aq and(-ap.IconSize-10)*2 or(-ap.IconSize-10),0,ap.HeaderSize-10),
+local as=af("Frame",{
+Size=UDim2.new(1,0,0,ap.HeaderSize),
 BackgroundTransparency=1,
+Parent=al,
+ClipsDescendants=true,
 },{
-af("TextLabel",{
-Text=ap.Title,
-TextXAlignment="Left",
-Size=UDim2.new(1,0,0,16),
-ThemeTag={
-TextColor3="Text",
-},
-FontFace=Font.new(ae.Font,Enum.FontWeight.SemiBold),
-TextSize=14,
+af("TextButton",{
+Size=UDim2.new(1,0,0,ap.HeaderSize),
 BackgroundTransparency=1,
-TextTransparency=.2,
-TextWrapped=true,
-ClipsDescendants=true,
-}),
+Text="",
+},{
+aq,
 af("TextLabel",{
-Text=ap.Desc,
-TextXAlignment="Left",
-Size=UDim2.new(1,0,0,12),
-ThemeTag={
-TextColor3="Text",
-},
-FontFace=Font.new(ae.Font,Enum.FontWeight.Medium),
-TextSize=11,
-BackgroundTransparency=1,
-TextTransparency=.6,
-TextWrapped=true,
-ClipsDescendants=true,
-LayoutOrder=1
-}),
-af("UIListLayout",{
-FillDirection="Vertical",
-Padding=UDim.new(0,2)
-})
-})
-else
-titleContent=af("TextLabel",{
-Text=ap.Title,
+Text=displayText,
+RichText=true,
 TextXAlignment="Left",
 Size=UDim2.new(
 1,
 aq and(-ap.IconSize-10)*2
 or(-ap.IconSize-10),
+
 1,
 0
 ),
@@ -9482,38 +9432,9 @@ FontFace=Font.new(ae.Font,Enum.FontWeight.SemiBold),
 TextSize=14,
 BackgroundTransparency=1,
 TextTransparency=.7,
+
 TextWrapped=true
-})
-end
-
-local outlineFrame
-if ap.Desc then
-outlineFrame=af("ImageLabel",{
-Size=UDim2.new(1,-6,1,-6),
-Position=UDim2.new(0,3,0,3),
-BackgroundTransparency=1,
-Image=ae.Shapes["Squircle-Outline"],
-ImageColor3=Color3.fromRGB(255,255,255),
-ImageTransparency=.85,
-ScaleType="Slice",
-SliceCenter=Rect.new(128,128,128,128)
-})
-end
-
-local as=af("Frame",{
-Size=UDim2.new(1,0,0,ap.HeaderSize),
-BackgroundTransparency=1,
-Parent=al,
-ClipsDescendants=true,
-},{
-outlineFrame,
-af("TextButton",{
-Size=UDim2.new(1,0,0,ap.HeaderSize),
-BackgroundTransparency=1,
-Text="",
-},{
-aq,
-titleContent,
+}),
 af("UIListLayout",{
 FillDirection="Horizontal",
 VerticalAlignment="Center",
